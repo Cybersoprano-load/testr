@@ -1,0 +1,11 @@
+# Grafana подхватывает все JSON-дашборды из указанной папки при старте.
+apiVersion: 1
+
+providers:
+  - name: default
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

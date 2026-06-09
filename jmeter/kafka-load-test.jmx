@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Kafka Load Test">
+      <stringProp name="TestPlan.comments">Нагрузка на Kafka: 4 ступени по 5 минут (5/10/12/14 оп/с). Каждое 10-е сообщение head=false.</stringProp>
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <com.di.jmeter.kafka.config.KafkaProducerConfig guiclass="TestBeanGUI" testclass="com.di.jmeter.kafka.config.KafkaProducerConfig" testname="Kafka Producer Config">
+        <stringProp name="kafkaProducerClientVariableName">KafkaProducerClient</stringProp>
+        <stringProp name="kafkaBrokers">${__P(kafka.brokers,localhost:9092)}</stringProp>
+        <stringProp name="clientId">jmeter-producer</stringProp>
+        <stringProp name="serializerKey">org.apache.kafka.common.serialization.StringSerializer</stringProp>
+        <stringProp name="serializerValue">org.apache.kafka.common.serialization.StringSerializer</stringProp>
+        <stringProp name="batchSize">16384</stringProp>
+        <stringProp name="securityType">securityType.plaintext</stringProp>
+        <stringProp name="kafkaSslKeystore"></stringProp>
+        <stringProp name="kafkaSslKeystorePassword"></stringProp>
+        <stringProp name="kafkaSslTruststore"></stringProp>
+        <stringProp name="kafkaSslTruststorePassword"></stringProp>
+        <stringProp name="kafkaSslPrivateKeyPass"></stringProp>
+        <collectionProp name="extraConfigs"/>
+      </com.di.jmeter.kafka.config.KafkaProducerConfig>
+      <hashTree/>
+      <kg.apc.jmeter.threads.UltimateThreadGroup guiclass="kg.apc.jmeter.threads.UltimateThreadGroupGui" testclass="kg.apc.jmeter.threads.UltimateThreadGroup" testname="Stepping load 5/10/12/14 ops/s">
+        <collectionProp name="ultimatethreadgroupdata">
+          <collectionProp name="629599913">
+            <stringProp name="r1c1">5</stringProp>
+            <stringProp name="r1c2">0</stringProp>
+            <stringProp name="r1c3">5</stringProp>
+            <stringProp name="r1c4">300</stringProp>
+            <stringProp name="48">0</stringProp>
+          </collectionProp>
+          <collectionProp name="-1061878308">
+            <stringProp name="r2c1">10</stringProp>
+            <stringProp name="r2c2">310</stringProp>
+            <stringProp name="r2c3">5</stringProp>
+            <stringProp name="r2c4">300</stringProp>
+            <stringProp name="r2c5">5</stringProp>
+          </collectionProp>
+          <collectionProp name="-1400735775">
+            <stringProp name="r3c1">12</stringProp>
+            <stringProp name="r3c2">620</stringProp>
+            <stringProp name="r3c3">5</stringProp>
+            <stringProp name="r3c4">300</stringProp>
+            <stringProp name="r3c5">5</stringProp>
+          </collectionProp>
+          <collectionProp name="-1739593242">
+            <stringProp name="r4c1">14</stringProp>
+            <stringProp name="r4c2">930</stringProp>
+            <stringProp name="r4c3">5</stringProp>
+            <stringProp name="r4c4">300</stringProp>
+            <stringProp name="r4c5">5</stringProp>
+          </collectionProp>
+        </collectionProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <stringProp name="ThreadGroup.num_threads">14</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </kg.apc.jmeter.threads.UltimateThreadGroup>
+      <hashTree>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="build message">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import java.util.concurrent.atomic.AtomicLong
+import groovy.json.JsonOutput
+
+// Глобальный счётчик на все потоки: создаётся один раз (putIfAbsent потокобезопасен),
+// поэтому &quot;каждое 10-е сообщение&quot; считается по всему тесту, а не в каждом потоке.
+props.putIfAbsent(&quot;msgCounter&quot;, new AtomicLong(0))
+long n = ((AtomicLong) props.get(&quot;msgCounter&quot;)).incrementAndGet()
+boolean head = (n % 10 != 0)            // каждое 10-е сообщение head=false
+String uuid = UUID.randomUUID().toString()
+
+vars.put(&quot;msg_uuid&quot;, uuid)
+vars.put(&quot;kafkaBody&quot;, JsonOutput.toJson([msg_uuid: uuid, head: head, method: &quot;POST&quot;, uri: &quot;/post-message&quot;]))</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <com.di.jmeter.kafka.sampler.KafkaProducerSampler guiclass="TestBeanGUI" testclass="com.di.jmeter.kafka.sampler.KafkaProducerSampler" testname="Produce to Kafka">
+          <stringProp name="kafkaProducerClientVariableName">KafkaProducerClient</stringProp>
+          <stringProp name="kafkaTopic">${__P(kafka.topic,messages)}</stringProp>
+          <stringProp name="kafkaMessageKey">${msg_uuid}</stringProp>
+          <stringProp name="kafkaMessage">${kafkaBody}</stringProp>
+          <stringProp name="partitionString"></stringProp>
+          <collectionProp name="messageHeaders"/>
+        </com.di.jmeter.kafka.sampler.KafkaProducerSampler>
+        <hashTree/>
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="1 op/s per thread">
+          <intProp name="calcMode">0</intProp>
+          <doubleProp>
+            <name>throughput</name>
+            <value>60.0</value>
+            <savedValue>0.0</savedValue>
+          </doubleProp>
+        </ConstantThroughputTimer>
+        <hashTree/>
+      </hashTree>
+      <BackendListener guiclass="BackendListenerGui" testclass="BackendListener" testname="InfluxDB Backend Listener">
+        <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="influxdbMetricsSender" elementType="Argument">
+              <stringProp name="Argument.name">influxdbMetricsSender</stringProp>
+              <stringProp name="Argument.value">org.apache.jmeter.visualizers.backend.influxdb.HttpMetricsSender</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="influxdbUrl" elementType="Argument">
+              <stringProp name="Argument.name">influxdbUrl</stringProp>
+              <stringProp name="Argument.value">http://localhost:8086/write?db=jmeter</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="application" elementType="Argument">
+              <stringProp name="Argument.name">application</stringProp>
+              <stringProp name="Argument.value">kafka-load-test</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="measurement" elementType="Argument">
+              <stringProp name="Argument.name">measurement</stringProp>
+              <stringProp name="Argument.value">jmeter</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="summaryOnly" elementType="Argument">
+              <stringProp name="Argument.name">summaryOnly</stringProp>
+              <stringProp name="Argument.value">false</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="samplersRegex" elementType="Argument">
+              <stringProp name="Argument.name">samplersRegex</stringProp>
+              <stringProp name="Argument.value">.*</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="percentiles" elementType="Argument">
+              <stringProp name="Argument.name">percentiles</stringProp>
+              <stringProp name="Argument.value">90;95;99</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="testTitle" elementType="Argument">
+              <stringProp name="Argument.name">testTitle</stringProp>
+              <stringProp name="Argument.value">Kafka Load Test</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="eventTags" elementType="Argument">
+              <stringProp name="Argument.name">eventTags</stringProp>
+              <stringProp name="Argument.value"></stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </elementProp>
+        <stringProp name="classname">org.apache.jmeter.visualizers.backend.influxdb.InfluxdbBackendListenerClient</stringProp>
+      </BackendListener>
+      <hashTree/>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
