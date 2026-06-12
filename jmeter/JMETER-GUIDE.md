@@ -116,11 +116,11 @@ vars.put("kafkaBody", JsonOutput.toJson([msg_uuid: uuid, head: head, method: "PO
 | Переменная | Где задаётся | Что это |
 |---|---|---|
 | `KafkaProducerClient` | Kafka Producer Config и Sampler (поле «Variable Name») | имя, под которым хранится созданный продюсер Kafka; **связывает** Config (создаёт продюсер) и Sampler (использует его). |
-| `kafka.brokers` | JMeter property, `${__P(kafka.brokers,localhost:9092)}` | адрес брокера; по умолчанию `localhost:9092`, можно переопределить через `-Jkafka.brokers=…`. |
-| `kafka.topic` | JMeter property, `${__P(kafka.topic,messages)}` | имя топика; по умолчанию `messages`, переопределяется через `-Jkafka.topic=…`. |
+| адрес брокера | Kafka Producer Config, поле «Kafka Brokers» | задан напрямую: `localhost:9092` (внешний listener Kafka, проброшенный на хост). |
+| имя топика | Kafka Producer Sampler, поле «Kafka Topic» | задано напрямую: `messages`. |
 
-> `${имя}` — это подстановка значения переменной из `vars`. `${__P(имя, по_умолчанию)}` —
-> подстановка **property** (значения уровня всего JMeter, заданного через `-J` или дефолт).
+> `${имя}` — это подстановка значения переменной из `vars` (например `${msg_uuid}`, `${kafkaBody}`).
+> Адрес брокера и топик не вынесены в переменные — они прописаны прямо в полях для простоты.
 
 ---
 

@@ -2,40 +2,31 @@ spring:
   application:
     name: kafka-stub
 
-  # --- Kafka ---
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: ${KAFKA_GROUP_ID:kafka-stub}
       auto-offset-reset: earliest
-      # Сообщения приходят как обычный JSON-текст, поэтому десериализуем в String,
-      # а разбираем уже в коде через ObjectMapper.
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     listener:
-      # Многопоточная вычитка (п.1.3 #3): число consumer-потоков в группе.
       concurrency: ${KAFKA_CONCURRENCY:3}
 
-  # --- PostgreSQL ---
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/kafka_stub}
     username: ${DB_USER:kafka_stub}
     password: ${DB_PASSWORD:kafka_stub}
   jpa:
     hibernate:
-      # Схему создаёт init.sql; Hibernate только проверяет соответствие сущности таблице.
       ddl-auto: validate
     open-in-view: false
 
-# --- Настройки самой заглушки ---
 stub:
   kafka:
     topic: ${KAFKA_TOPIC:messages}
   delay:
-    # Начальная задержка перед записью в БД (мс). Меняется на лету через PUT /api/delay.
     initial-ms: ${STUB_DELAY_MS:1000}
 
-# --- Actuator / метрики для Grafana (п.2) ---
 management:
   endpoints:
     web:
@@ -46,5 +37,4 @@ management:
       show-details: always
   metrics:
     tags:
-      # Тег application нужен дашборду JVM (Micrometer), чтобы фильтровать по приложению.
       application: kafka-stub

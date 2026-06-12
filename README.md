@@ -41,11 +41,12 @@ docker compose down -v            # остановить и удалить да�
 | Kafka UI | http://localhost:8081 | — | просмотр топика в браузере |
 | PostgreSQL | `localhost:5432` | `postgres:5432` | БД, таблица `messages` (п.1.1) |
 | Заглушка (Spring) | http://localhost:8080 | `stub:8080` | консьюмер Kafka → запись в БД (п.1.3) |
-| Prometheus | http://localhost:9090 | `prometheus:9090` | сбор метрик JVM/Postgres/Kafka |
+| Prometheus | http://localhost:9090 | `prometheus:9090` | сбор метрик JVM/Postgres/Kafka/хоста |
 | Grafana | http://localhost:3000 | — | дашборды (admin / admin) |
 | InfluxDB | `localhost:8086` | `influxdb:8086` | метрики JMeter (db `jmeter`) |
 | postgres-exporter | http://localhost:9187/metrics | `postgres-exporter:9187` | метрики PostgreSQL |
 | kafka-exporter | http://localhost:9308/metrics | `kafka-exporter:9308` | метрики Kafka (lag, offset'ы) |
+| node-exporter | http://localhost:9100/metrics | `node-exporter:9100` | метрики хоста (CPU, RAM, диск, сеть) |
 
 Доступы к БД: база `kafka_stub`, пользователь `kafka_stub`, пароль `kafka_stub`.
 

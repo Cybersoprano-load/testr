@@ -2,17 +2,18 @@
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Kafka Load Test">
-      <stringProp name="TestPlan.comments">Нагрузка на Kafka: 4 ступени по 5 минут (5/10/12/14 оп/с). Каждое 10-е сообщение head=false.</stringProp>
+      <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
     </TestPlan>
     <hashTree>
       <com.di.jmeter.kafka.config.KafkaProducerConfig guiclass="TestBeanGUI" testclass="com.di.jmeter.kafka.config.KafkaProducerConfig" testname="Kafka Producer Config">
         <stringProp name="kafkaProducerClientVariableName">KafkaProducerClient</stringProp>
-        <stringProp name="kafkaBrokers">${__P(kafka.brokers,localhost:9092)}</stringProp>
+        <stringProp name="kafkaBrokers">localhost:9092</stringProp>
         <stringProp name="clientId">jmeter-producer</stringProp>
         <stringProp name="serializerKey">org.apache.kafka.common.serialization.StringSerializer</stringProp>
         <stringProp name="serializerValue">org.apache.kafka.common.serialization.StringSerializer</stringProp>
@@ -28,33 +29,33 @@
       <hashTree/>
       <kg.apc.jmeter.threads.UltimateThreadGroup guiclass="kg.apc.jmeter.threads.UltimateThreadGroupGui" testclass="kg.apc.jmeter.threads.UltimateThreadGroup" testname="Stepping load 5/10/12/14 ops/s">
         <collectionProp name="ultimatethreadgroupdata">
-          <collectionProp name="629599913">
-            <stringProp name="r1c1">5</stringProp>
-            <stringProp name="r1c2">0</stringProp>
-            <stringProp name="r1c3">5</stringProp>
-            <stringProp name="r1c4">300</stringProp>
+          <collectionProp name="-682199813">
+            <stringProp name="53">5</stringProp>
             <stringProp name="48">0</stringProp>
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="1509345">1200</stringProp>
+            <stringProp name="1567">10</stringProp>
           </collectionProp>
-          <collectionProp name="-1061878308">
-            <stringProp name="r2c1">10</stringProp>
-            <stringProp name="r2c2">310</stringProp>
-            <stringProp name="r2c3">5</stringProp>
-            <stringProp name="r2c4">300</stringProp>
-            <stringProp name="r2c5">5</stringProp>
+          <collectionProp name="1240533826">
+            <stringProp name="53">5</stringProp>
+            <stringProp name="50547">300</stringProp>
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="56313">900</stringProp>
+            <stringProp name="1567">10</stringProp>
           </collectionProp>
-          <collectionProp name="-1400735775">
-            <stringProp name="r3c1">12</stringProp>
-            <stringProp name="r3c2">620</stringProp>
-            <stringProp name="r3c3">5</stringProp>
-            <stringProp name="r3c4">300</stringProp>
-            <stringProp name="r3c5">5</stringProp>
+          <collectionProp name="-147512935">
+            <stringProp name="53">5</stringProp>
+            <stringProp name="53430">600</stringProp>
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="53430">600</stringProp>
+            <stringProp name="1567">10</stringProp>
           </collectionProp>
-          <collectionProp name="-1739593242">
-            <stringProp name="r4c1">14</stringProp>
-            <stringProp name="r4c2">930</stringProp>
-            <stringProp name="r4c3">5</stringProp>
-            <stringProp name="r4c4">300</stringProp>
-            <stringProp name="r4c5">5</stringProp>
+          <collectionProp name="-1558731390">
+            <stringProp name="53">5</stringProp>
+            <stringProp name="56313">900</stringProp>
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="50547">300</stringProp>
+            <stringProp name="1567">10</stringProp>
           </collectionProp>
         </collectionProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
@@ -69,7 +70,7 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </kg.apc.jmeter.threads.UltimateThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="build message">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="build message" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -77,27 +78,25 @@
           <stringProp name="script">import java.util.concurrent.atomic.AtomicLong
 import groovy.json.JsonOutput
 
-// Глобальный счётчик на все потоки: создаётся один раз (putIfAbsent потокобезопасен),
-// поэтому &quot;каждое 10-е сообщение&quot; считается по всему тесту, а не в каждом потоке.
 props.putIfAbsent(&quot;msgCounter&quot;, new AtomicLong(0))
 long n = ((AtomicLong) props.get(&quot;msgCounter&quot;)).incrementAndGet()
-boolean head = (n % 10 != 0)            // каждое 10-е сообщение head=false
+boolean head = (n % 10 != 0)
 String uuid = UUID.randomUUID().toString()
 
 vars.put(&quot;msg_uuid&quot;, uuid)
 vars.put(&quot;kafkaBody&quot;, JsonOutput.toJson([msg_uuid: uuid, head: head, method: &quot;POST&quot;, uri: &quot;/post-message&quot;]))</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <com.di.jmeter.kafka.sampler.KafkaProducerSampler guiclass="TestBeanGUI" testclass="com.di.jmeter.kafka.sampler.KafkaProducerSampler" testname="Produce to Kafka">
+        <com.di.jmeter.kafka.sampler.KafkaProducerSampler guiclass="TestBeanGUI" testclass="com.di.jmeter.kafka.sampler.KafkaProducerSampler" testname="Produce to Kafka" enabled="true">
           <stringProp name="kafkaProducerClientVariableName">KafkaProducerClient</stringProp>
-          <stringProp name="kafkaTopic">${__P(kafka.topic,messages)}</stringProp>
+          <stringProp name="kafkaTopic">messages</stringProp>
           <stringProp name="kafkaMessageKey">${msg_uuid}</stringProp>
           <stringProp name="kafkaMessage">${kafkaBody}</stringProp>
           <stringProp name="partitionString"></stringProp>
           <collectionProp name="messageHeaders"/>
         </com.di.jmeter.kafka.sampler.KafkaProducerSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="1 op/s per thread">
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="1 op">
           <intProp name="calcMode">0</intProp>
           <doubleProp>
             <name>throughput</name>
@@ -160,7 +159,7 @@ vars.put(&quot;kafkaBody&quot;, JsonOutput.toJson([msg_uuid: uuid, head: head, m
         <stringProp name="classname">org.apache.jmeter.visualizers.backend.influxdb.InfluxdbBackendListenerClient</stringProp>
       </BackendListener>
       <hashTree/>
-      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>

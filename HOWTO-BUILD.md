@@ -55,7 +55,7 @@ JMeter → Kafka (топик messages) → заглушка (Spring) → Postgre
 `/docker-entrypoint-initdb.d/`). Схемой владеет SQL, а не Hibernate (заглушка только `validate`).
 
 **`infra/prometheus/prometheus.yml`** — что Prometheus опрашивает (scrape): заглушку
-(`/actuator/prometheus`), postgres-exporter и kafka-exporter. Интервал сбора — 10 c.
+(`/actuator/prometheus`), postgres-exporter, kafka-exporter и node-exporter. Интервал сбора — 10 c.
 
 **`infra/grafana/provisioning/datasources/datasources.yml`** — автонастройка источников данных
 Grafana при старте: Prometheus (метрики JVM/Postgres/Kafka) и InfluxDB (метрики JMeter).
@@ -63,12 +63,13 @@ Grafana при старте: Prometheus (метрики JVM/Postgres/Kafka) и I
 **`infra/grafana/provisioning/dashboards/dashboards.yml`** — провайдер дашбордов: говорит Grafana
 подхватить все JSON-дашборды из этой папки при старте.
 
-**`infra/grafana/provisioning/dashboards/*.json`** — сами дашборды (стандартные с grafana.com,
-переработанные под наши датасорсы):
+**`infra/grafana/provisioning/dashboards/*.json`** — сами дашборды (в основном стандартные с
+grafana.com, переработанные под наши датасорсы; node-exporter — собственный):
 - `jvm-micrometer.json` — JVM-метрики заглушки (ID 4701);
 - `postgres.json` — метрики PostgreSQL (ID 9628);
 - `kafka-exporter.json` — метрики Kafka (ID 7589);
-- `jmeter.json` — метрики прогона JMeter из InfluxDB (ID 5496).
+- `jmeter.json` — метрики прогона JMeter из InfluxDB (ID 5496);
+- `node-exporter.json` — метрики хоста: CPU, RAM, диск, сеть (собственный компактный дашборд).
 
 ### Заглушка (Spring Boot) — `stub/`
 

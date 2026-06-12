@@ -9,11 +9,6 @@ import jakarta.persistence.Table;
 
 import java.util.UUID;
 
-/**
- * Строка таблицы messages — то, что заглушка сохраняет в PostgreSQL.
- * Имена столбцов в БД snake_case; соответствие из задания:
- * msg_uuid → msgUuid, head → head, time_rq → timeRq.
- */
 @Entity
 @Table(name = "messages")
 public class MessageRecord {
@@ -28,11 +23,9 @@ public class MessageRecord {
     @Column(name = "head", nullable = false)
     private boolean head;
 
-    /** Время вычитки сообщения из Kafka в формате UNIX (секунды). */
     @Column(name = "time_rq", nullable = false)
     private long timeRq;
 
-    /** Конструктор без аргументов нужен JPA. */
     protected MessageRecord() {
     }
 

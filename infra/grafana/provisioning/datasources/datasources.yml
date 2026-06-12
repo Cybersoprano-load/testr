@@ -1,8 +1,6 @@
-# Источники данных Grafana создаются автоматически при старте контейнера.
 apiVersion: 1
 
 datasources:
-  # Prometheus - метрики JVM, PostgreSQL и Kafka
   - name: Prometheus
     type: prometheus
     uid: prometheus
@@ -10,7 +8,6 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
 
-  # InfluxDB — метрики JMeter (их шлёт Backend Listener из теста).
   - name: InfluxDB
     type: influxdb
     uid: influxdb

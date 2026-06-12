@@ -6,14 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Текущая задержка перед записью в БД (в миллисекундах).
- *
- * Значение хранится в AtomicLong, поэтому его можно безопасно менять на лету
- * из разных потоков без перезапуска заглушки (п.3 задания).
- * Та же величина публикуется в Micrometer как gauge "stub.delay.ms" —
- * её видно в Grafana вместе с остальными метриками.
- */
 @Component
 public class DelayState {
 
@@ -22,7 +14,6 @@ public class DelayState {
     public DelayState(@Value("${stub.delay.initial-ms:1000}") long initialMs,
                       MeterRegistry registry) {
         this.delayMs = new AtomicLong(initialMs);
-        // gauge следит за тем же объектом AtomicLong: меняем задержку — метрика обновляется сама.
         registry.gauge("stub.delay.ms", delayMs);
     }
 

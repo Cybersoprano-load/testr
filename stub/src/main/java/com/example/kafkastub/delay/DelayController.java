@@ -1,18 +1,16 @@
 package com.example.kafkastub.delay;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * REST для управления задержкой на лету (п.3 задания):
- *   GET  /api/delay                  → текущее значение задержки
- *   PUT  /api/delay {"delayMs": 500} → поменять задержку без перезапуска заглушки
- */
 @RestController
 @RequestMapping("/api/delay")
 public class DelayController {
@@ -34,7 +32,13 @@ public class DelayController {
         return Map.of("delayMs", delayState.get());
     }
 
-    /** Тело PUT-запроса: новое значение задержки в миллисекундах. */
     public record DelayRequest(long delayMs) {
+    }
+
+    // Отрицательная задержка — ошибка клиента, отдаём 400 вместо 500
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> onInvalidDelay(IllegalArgumentException e) {
+        return Map.of("error", e.getMessage());
     }
 }

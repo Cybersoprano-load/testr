@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!--
-      Формат лога точно как в задании:
-      2026-06-07 12:00:00.123 – [Read from Kafka] {...}
-      (разделитель – это длинное тире, en-dash U+2013).
-    -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} – %msg%n</pattern>

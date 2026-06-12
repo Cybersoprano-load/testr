@@ -1,4 +1,3 @@
-# Grafana подхватывает все JSON-дашборды из указанной папки при старте.
 apiVersion: 1
 
 providers:

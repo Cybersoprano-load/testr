@@ -1,20 +1,20 @@
-# Prometheus собирает метрики со всех экспортеров и из самой заглушки.
 global:
   scrape_interval: 10s
 
 scrape_configs:
-  # JVM-метрики заглушки (Micrometer отдаёт их в формате Prometheus).
   - job_name: kafka-stub
     metrics_path: /actuator/prometheus
     static_configs:
       - targets: ["stub:8080"]
 
-  # Метрики PostgreSQL.
   - job_name: postgres
     static_configs:
       - targets: ["postgres-exporter:9187"]
 
-  # Метрики Kafka (offset'ы, consumer lag и т.п.).
   - job_name: kafka
     static_configs:
       - targets: ["kafka-exporter:9308"]
+
+  - job_name: node
+    static_configs:
+      - targets: ["node-exporter:9100"]

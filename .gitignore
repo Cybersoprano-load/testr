@@ -1,6 +1,4 @@
-# Артефакты прогонов JMeter
 *.jtl
 jmeter.log
 jmeter/jmeter*.log
-# Сборка Java
 stub/target/
